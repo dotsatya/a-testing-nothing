@@ -2,21 +2,17 @@
 
 import React, { useEffect, useRef } from "react";
 
-interface Star {
+interface Snowflake {
   x: number;
   y: number;
-  size: number;
-  alpha: number;
-  twinkleSpeed: number;
-  color: string;
-}
-
-interface Ember {
-  x: number;
-  y: number;
+  radius: number;
   vy: number;
-  size: number;
+  vx: number;
+  wobble: number;
+  wobbleSpeed: number;
   alpha: number;
+  color: string;
+  glow: boolean;
 }
 
 export function StarField() {
@@ -35,27 +31,41 @@ export function StarField() {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = width < 640;
 
-    // Mobile-optimized count: fewer stars to preserve mobile battery & GPU
-    const starCount = isMobile ? 45 : 90;
-    const colors = ["#DCE5F2", "#FFF7E8", "#FFD58A"];
+    // Rich, clearly visible falling snow particles
+    const flakeCount = isMobile ? 85 : 135;
+    const colors = [
+      "rgba(255, 255, 255, 1)",
+      "rgba(242, 248, 255, 0.96)",
+      "rgba(255, 250, 240, 0.96)",
+      "rgba(255, 225, 160, 0.92)", // Warm lantern stardust
+    ];
 
-    const stars: Star[] = Array.from({ length: starCount }, () => ({
+    const flakes: Snowflake[] = Array.from({ length: flakeCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 1.5 + 0.4,
-      alpha: Math.random() * 0.7 + 0.2,
-      twinkleSpeed: (Math.random() * 0.015 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+      radius: Math.random() * 2.2 + 1.5, // Clearly visible 1.5px - 3.7px
+      vy: Math.random() * 0.85 + 0.45,  // Peaceful, noticeable downward snowfall
+      vx: Math.random() * 0.4 - 0.2,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: Math.random() * 0.025 + 0.01,
+      alpha: Math.random() * 0.25 + 0.75, // Very bright: 0.75 to 1.0 opacity
       color: colors[Math.floor(Math.random() * colors.length)],
+      glow: Math.random() > 0.35,
     }));
 
-    // Floating micro-embers
-    const emberCount = isMobile ? 12 : 25;
-    const embers: Ember[] = Array.from({ length: emberCount }, () => ({
+    // Dreamy soft bokeh snowflakes (larger, soft glow)
+    const bokehCount = isMobile ? 16 : 26;
+    const bokehFlakes: Snowflake[] = Array.from({ length: bokehCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vy: -(Math.random() * 0.35 + 0.15),
-      size: Math.random() * 1.8 + 0.6,
-      alpha: Math.random() * 0.6 + 0.2,
+      radius: Math.random() * 2.5 + 3.2, // 3.2px - 5.7px glowing flakes
+      vy: Math.random() * 0.55 + 0.3,
+      vx: Math.random() * 0.3 - 0.15,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: Math.random() * 0.018 + 0.008,
+      alpha: Math.random() * 0.3 + 0.6,
+      color: Math.random() > 0.3 ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 220, 150, 0.85)",
+      glow: true,
     }));
 
     const handleResize = () => {
@@ -69,43 +79,58 @@ export function StarField() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Render stars
-      for (const s of stars) {
+      // Render regular falling snowflakes
+      for (const f of flakes) {
         if (!prefersReducedMotion) {
-          s.alpha += s.twinkleSpeed;
-          if (s.alpha > 0.95 || s.alpha < 0.15) {
-            s.twinkleSpeed = -s.twinkleSpeed;
+          f.y += f.vy;
+          f.wobble += f.wobbleSpeed;
+          f.x += f.vx + Math.sin(f.wobble) * 0.45;
+
+          if (f.y > height + 8) {
+            f.y = -8;
+            f.x = Math.random() * width;
           }
+          if (f.x > width + 8) f.x = -8;
+          if (f.x < -8) f.x = width + 8;
         }
 
         ctx.save();
-        ctx.fillStyle = s.color;
-        ctx.globalAlpha = Math.max(0.1, Math.min(1, s.alpha));
+        ctx.fillStyle = f.color;
+        ctx.globalAlpha = f.alpha;
+        if (f.glow) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = f.color;
+        }
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
 
-      // Render warm motes
-      if (!prefersReducedMotion) {
-        for (const e of embers) {
-          e.y += e.vy;
-          if (e.y < -10) {
-            e.y = height + 10;
-            e.x = Math.random() * width;
-          }
+      // Render larger glowing bokeh snowflakes
+      for (const b of bokehFlakes) {
+        if (!prefersReducedMotion) {
+          b.y += b.vy;
+          b.wobble += b.wobbleSpeed;
+          b.x += b.vx + Math.sin(b.wobble) * 0.35;
 
-          ctx.save();
-          ctx.fillStyle = "#FFD58A";
-          ctx.globalAlpha = e.alpha * 0.6;
-          ctx.shadowBlur = 6;
-          ctx.shadowColor = "#FFD58A";
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+          if (b.y > height + 12) {
+            b.y = -12;
+            b.x = Math.random() * width;
+          }
+          if (b.x > width + 12) b.x = -12;
+          if (b.x < -12) b.x = width + 12;
         }
+
+        ctx.save();
+        ctx.fillStyle = b.color;
+        ctx.globalAlpha = b.alpha;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = b.color;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
 
       animId = requestAnimationFrame(render);
@@ -122,7 +147,7 @@ export function StarField() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-75"
+      className="fixed inset-0 pointer-events-none z-10 opacity-100"
       aria-hidden="true"
     />
   );

@@ -4,7 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { siteConfig } from "@/config/personalization";
 
-export function AmbientAudio() {
+interface AmbientAudioProps {
+  className?: string;
+  isStandalone?: boolean;
+}
+
+export function AmbientAudio({ className = "", isStandalone = false }: AmbientAudioProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const volume = siteConfig.music.defaultVolume ?? 0.3;
@@ -40,19 +45,27 @@ export function AmbientAudio() {
     }
   };
 
+  const containerClasses = isStandalone
+    ? `fixed z-50 touch-manipulation top-3 right-3 sm:top-4 sm:right-4 ${className}`
+    : `relative z-30 touch-manipulation flex items-center shrink-0 ${className}`;
+
   return (
-    <aside
+    <div
       aria-label="Audio Controls"
-      className="fixed z-50 flex items-center touch-manipulation"
-      style={{
-        top: "max(12px, env(safe-area-inset-top, 12px))",
-        right: "max(12px, env(safe-area-inset-right, 12px))",
-      }}
+      className={containerClasses}
+      style={
+        isStandalone
+          ? {
+              top: "max(0.75rem, env(safe-area-inset-top, 0.75rem))",
+              right: "max(0.75rem, env(safe-area-inset-right, 0.75rem))",
+            }
+          : undefined
+      }
     >
       <button
         onClick={toggleAudio}
         aria-label={isPlaying ? "Pause background music" : "Play gentle background music"}
-        className="flex items-center gap-2 h-10 px-3.5 rounded-full bg-[#171B3A]/90 backdrop-blur-md border border-[#FFD58A]/30 text-[#DCE5F2] hover:text-[#FFF7E8] active:scale-95 transition-all shadow-xl shadow-[#0B1026]/90 text-xs cursor-pointer select-none"
+        className="flex items-center gap-1.5 min-h-[36px] h-9 px-3 rounded-full bg-[#171B3A]/85 backdrop-blur-md border border-[#FFD58A]/35 text-[#DCE5F2] hover:text-[#FFF7E8] hover:border-[#FFD58A] active:scale-95 transition-all shadow-lg shadow-[#0B1026]/80 text-[11px] cursor-pointer select-none"
       >
         <span className="relative flex h-2 w-2">
           {isPlaying && (
@@ -71,7 +84,7 @@ export function AmbientAudio() {
           <VolumeX className="w-3.5 h-3.5 opacity-60" />
         )}
 
-        <span className="font-serif-display tracking-widest text-xs uppercase text-[#FFF7E8]">
+        <span className="font-serif-display tracking-widest text-[10px] uppercase text-[#FFF7E8]">
           Music
         </span>
 
@@ -83,6 +96,6 @@ export function AmbientAudio() {
           </span>
         )}
       </button>
-    </aside>
+    </div>
   );
 }

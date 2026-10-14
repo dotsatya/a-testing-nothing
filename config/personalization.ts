@@ -1,80 +1,34 @@
+export interface StoryPart {
+  partNumber: number;
+  subtitle: string;
+  text: string;
+}
+
 export interface SiteConfig {
-  /**
-   * Her name or nickname.
-   * If provided, it can be woven into the opening dedication and salutation.
-   * If left empty, defaults to gentle poetic phrasing ("for you").
-   */
   herName: string;
-
-  /**
-   * Your name or nickname for the closing signature.
-   * If left empty, defaults to "A little story, with a little warmth, just for you."
-   */
   myName: string;
-
-  /**
-   * Title of the mobile experience.
-   */
   title: string;
-
-  /**
-   * Main poetic tagline.
-   */
   tagline: string;
 
   /**
-   * Hero opening heading, supporting text, and CTA.
+   * Initial screen content.
    */
-  hero: {
+  intro: {
+    badge: string;
     heading: string;
-    supportingText: string;
-    ctaButton: string;
+    passage: string;
+    buttonText: string;
   };
 
   /**
-   * The 4 Story Scenes.
+   * The 4 concise story parts.
    */
-  scenes: {
-    scene1: {
-      title: string;
-      text: string;
-    };
-    scene2: {
-      title: string;
-      text: string;
-    };
-    scene3: {
-      title: string;
-      text: string;
-      revelation: string;
-    };
-  };
+  storyParts: StoryPart[];
 
   /**
-   * Scene 4 Personal Love Letter settings.
+   * Replay button label on the final part.
    */
-  letter: {
-    heading: string;
-    paragraphs: string[];
-    closing: string;
-    hiddenLanternMessage: string;
-    replayButtonText: string;
-  };
-
-  /**
-   * Optional custom note added inside the letter.
-   */
-  personalNote?: string;
-
-  /**
-   * Optional photos / polaroids for the letter section.
-   */
-  photos?: { url: string; caption: string; date?: string }[];
-
-  /**
-   * Closing message fallback.
-   */
-  closingMessage?: string;
+  replayButtonText: string;
 
   /**
    * Background audio settings.
@@ -83,59 +37,113 @@ export interface SiteConfig {
     title: string;
     artist: string;
     customAudioUrl: string;
-    defaultVolume: number; // 0.3 = 30%
+    defaultVolume: number;
   };
+
+  /**
+   * Optional legacy properties for backwards compatibility.
+   */
+  opening?: {
+    introText: string;
+    heading: string;
+    story: string[];
+    buttonText: string;
+  };
+  revealed?: {
+    heading: string;
+    message: string[];
+    closingSignature: string;
+    replayButtonText: string;
+  };
+  lantern?: {
+    hiddenMessage: string;
+    hintText: string;
+  };
+  hero?: {
+    heading: string;
+    supportingText: string;
+    ctaButton: string;
+  };
+  scenes?: Record<string, { title: string; text: string; revelation?: string }>;
+  letter?: {
+    heading: string;
+    paragraphs: string[];
+    closing: string;
+    hiddenLanternMessage: string;
+    replayButtonText: string;
+  };
+  personalNote?: string;
+  photos?: { url: string; caption: string; date?: string }[];
+  closingMessage?: string;
 }
 
 export const siteConfig: SiteConfig = {
-  herName: "", // e.g. "My Moon", "Sarah" (Leave empty for default poetic phrasing)
-  myName: "", // e.g. "Yours", "Alex" (Leave empty for default signature)
-  title: "A Little Light Beside Me",
-  tagline: "Not every light is meant to become our moon.",
-  closingMessage: "May your nights always have a gentle light beside you.",
-  photos: [],
+  herName: "", // e.g. "My Moon" (Leave empty for default poetic phrasing)
+  myName: "", // e.g. "Alex" (Leave empty for default signature)
+  title: "A Light That Never Asked to Be the Moon",
+  tagline: "A little story for someone special ♡",
 
-  hero: {
-    heading: "Somewhere between the moon and the light...",
-    supportingText: "There is a little story I want to share with you.",
-    ctaButton: "Come a little closer ✨",
+  intro: {
+    badge: "A little story for someone special ♡",
+    heading: "A Light That Never Asked to Be the Moon",
+    passage:
+      "There was once a boy who spent his nights wishing for the moon, never noticing the little lantern that quietly glowed beside him.",
+    buttonText: "Read the story ✨",
   },
 
-  scenes: {
-    scene1: {
-      title: "The Moon",
-      text: "He spent his nights wishing for the moon, hoping that one day it might come a little closer.",
+  storyParts: [
+    {
+      partNumber: 1,
+      subtitle: "The Moon",
+      text: "He spent his nights admiring the moon, wishing that one day it would come a little closer.",
     },
-    scene2: {
-      title: "The Lantern",
-      text: "All the while, a little lantern kept glowing beside him, offering its warmth without asking to be noticed.",
+    {
+      partNumber: 2,
+      subtitle: "The Lantern",
+      text: "Beside his window, a little lantern kept glowing quietly. But he was too busy wishing for the moon to notice.",
     },
-    scene3: {
-      title: "The Realization",
-      text: "Perhaps he had been so busy longing for a distant light that he forgot to notice the warmth already beside him.",
-      revelation: "The moon was never wrong for being far away. And the lantern was never wrong for shining.",
+    {
+      partNumber: 3,
+      subtitle: "The Night",
+      text: "One night, clouds covered the sky. The moon disappeared, but the little lantern was still there, shining beside him.",
     },
-  },
+    {
+      partNumber: 4,
+      subtitle: "The Realization",
+      text: "He finally understood that the moon was never wrong for being far away, and the lantern was never wrong for shining. He learned to see its warmth for what it truly was.",
+    },
+  ],
 
-  letter: {
-    heading: "And there's something I wanted you to know...",
-    paragraphs: [
-      "Some people bring a little warmth into our lives without even realizing it.",
-      "Maybe the most beautiful thing isn't always the light we spend our nights wishing for, but the light we learn to notice and appreciate.",
-      "You deserve to be seen, valued, and cared for — simply for being you.",
-      "And I hope this little story makes you smile, because it was made especially for you. ♡",
-    ],
-    closing: "A little story, with a little warmth, just for you.",
-    hiddenLanternMessage: "If this little light made you smile, then it has already done something beautiful tonight. ♡",
-    replayButtonText: "Read our story again",
-  },
-
-  personalNote: "", // Optional extra personal message
+  replayButtonText: "Read again",
 
   music: {
     title: "Love Story",
     artist: "Indila",
     customAudioUrl: "/LoveStory_Indila.mp3",
-    defaultVolume: 0.3, // 30% volume
+    defaultVolume: 0.3,
+  },
+
+  // Backwards compatibility fallbacks
+  opening: {
+    introText: "A little story for someone special ♡",
+    heading: "A Light That Never Asked to Be the Moon",
+    story: [
+      "There was once a boy who spent his nights wishing for the moon, never noticing the little lantern that quietly glowed beside him.",
+    ],
+    buttonText: "Read the story ✨",
+  },
+  revealed: {
+    heading: "The Realization",
+    message: [
+      "He finally understood that the moon was never wrong for being far away, and the lantern was never wrong for shining. He learned to see its warmth for what it truly was.",
+    ],
+    closingSignature: "With a little warmth, just for you.",
+    replayButtonText: "Read again",
+  },
+  lantern: {
+    hiddenMessage: "Some lights make the night feel warmer. ♡",
+    hintText: "tap the lantern",
   },
 };
+
+

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Dancing_Script, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -24,13 +24,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "A Little Light Beside Me 🌙🕯️",
-  description: "Not every light is meant to become our moon. A quiet, romantic story written for you.",
+  title: "A Light That Never Asked to Be the Moon 🌙🕯️",
+  description: "A little story for someone special ♡",
   openGraph: {
-    title: "A Little Light Beside Me 🌙🕯️",
-    description: "Not every light is meant to become our moon. A quiet, romantic story written for you.",
+    title: "A Light That Never Asked to Be the Moon 🌙🕯️",
+    description: "A little story for someone special ♡",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0B1026",
 };
 
 export default function RootLayout({
@@ -43,9 +52,10 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${dancingScript.variable} ${inter.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-[#0B1026] text-[#DCE5F2] selection:bg-[#FFD58A]/30 selection:text-[#FFF7E8]">
+      <body className="h-full w-full overflow-hidden bg-[#0B1026] text-[#DCE5F2] selection:bg-[#FFD58A]/30 selection:text-[#FFF7E8]">
         {children}
       </body>
     </html>
   );
 }
+
