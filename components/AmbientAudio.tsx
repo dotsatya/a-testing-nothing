@@ -12,36 +12,118 @@ interface AmbientAudioProps {
 export function AmbientAudio({ className = "", isStandalone = false }: AmbientAudioProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userPausedRef = useRef(false);
+  const wasPlayingBeforeLeaveRef = useRef(false);
   const volume = siteConfig.music.defaultVolume ?? 0.3;
 
   useEffect(() => {
-    if (siteConfig.music.customAudioUrl) {
-      const audio = new Audio(siteConfig.music.customAudioUrl);
-      audio.loop = true;
-      audio.volume = volume;
-      audioRef.current = audio;
+    if (!siteConfig.music.customAudioUrl) return;
 
-      audio.addEventListener("play", () => setIsPlaying(true));
-      audio.addEventListener("pause", () => setIsPlaying(false));
+    const audio = new Audio(siteConfig.music.customAudioUrl);
+    audio.loop = true;
+    audio.volume = volume;
+    audio.preload = "auto";
+    audioRef.current = audio;
 
-      return () => {
-        audio.pause();
-        audio.src = "";
-      };
-    }
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+
+    // Function to attempt autoplay
+    const attemptAutoplay = () => {
+      if (userPausedRef.current) return;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            wasPlayingBeforeLeaveRef.current = true;
+          })
+          .catch(() => {
+            // Autoplay blocked by browser policy until user gesture
+            setIsPlaying(false);
+          });
+      }
+    };
+
+    // 1. Automatically play when website opens
+    attemptAutoplay();
+
+    // 2. Fallback: If blocked by browser autoplay policy, start on first user interaction anywhere
+    const handleFirstInteraction = () => {
+      if (!userPausedRef.current && audio.paused) {
+        attemptAutoplay();
+      }
+      removeInteractionListeners();
+    };
+
+    const interactionEvents = ["click", "touchstart", "pointerdown", "keydown"];
+    const removeInteractionListeners = () => {
+      interactionEvents.forEach((event) => {
+        window.removeEventListener(event, handleFirstInteraction);
+      });
+    };
+
+    interactionEvents.forEach((event) => {
+      window.addEventListener(event, handleFirstInteraction, { passive: true });
+    });
+
+    // 3. When user leaves the website (tab hidden, window minimized, navigation away) -> stop music
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Left the website / tab switched
+        if (!audio.paused) {
+          wasPlayingBeforeLeaveRef.current = true;
+          audio.pause();
+        }
+      } else {
+        // Returned to website
+        if (wasPlayingBeforeLeaveRef.current && !userPausedRef.current) {
+          audio.play().catch(() => {});
+        }
+      }
+    };
+
+    const handleLeave = () => {
+      audio.pause();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handleLeave);
+    window.addEventListener("beforeunload", handleLeave);
+
+    return () => {
+      removeInteractionListeners();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handleLeave);
+      window.removeEventListener("beforeunload", handleLeave);
+      audio.pause();
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.src = "";
+    };
   }, [volume]);
 
   const toggleAudio = () => {
     if (!audioRef.current) return;
 
     if (isPlaying) {
+      userPausedRef.current = true;
+      wasPlayingBeforeLeaveRef.current = false;
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
+      userPausedRef.current = false;
+      wasPlayingBeforeLeaveRef.current = true;
       audioRef.current.volume = volume;
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(() => {});
+      audioRef.current
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch(() => {});
     }
   };
 

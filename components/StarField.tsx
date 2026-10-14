@@ -31,40 +31,40 @@ export function StarField() {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = width < 640;
 
-    // Rich, clearly visible falling snow particles
+    // Subtle, gentle romantic falling snow particles
     const flakeCount = isMobile ? 85 : 135;
     const colors = [
-      "rgba(255, 255, 255, 1)",
-      "rgba(242, 248, 255, 0.96)",
-      "rgba(255, 250, 240, 0.96)",
-      "rgba(255, 225, 160, 0.92)", // Warm lantern stardust
+      "rgba(255, 255, 255, 0.7)",
+      "rgba(242, 248, 255, 0.65)",
+      "rgba(255, 250, 240, 0.65)",
+      "rgba(255, 225, 160, 0.6)", // Warm lantern stardust
     ];
 
     const flakes: Snowflake[] = Array.from({ length: flakeCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      radius: Math.random() * 2.2 + 1.5, // Clearly visible 1.5px - 3.7px
-      vy: Math.random() * 0.85 + 0.45,  // Peaceful, noticeable downward snowfall
+      radius: Math.random() * 2.2 + 1.5, // 1.5px - 3.7px
+      vy: Math.random() * 0.85 + 0.45,  // Peaceful downward snowfall
       vx: Math.random() * 0.4 - 0.2,
       wobble: Math.random() * Math.PI * 2,
       wobbleSpeed: Math.random() * 0.025 + 0.01,
-      alpha: Math.random() * 0.25 + 0.75, // Very bright: 0.75 to 1.0 opacity
+      alpha: Math.random() * 0.25 + 0.3, // Soft subtle opacity: 0.3 to 0.55
       color: colors[Math.floor(Math.random() * colors.length)],
       glow: Math.random() > 0.35,
     }));
 
-    // Dreamy soft bokeh snowflakes (larger, soft glow)
+    // Dreamy soft bokeh snowflakes (larger, subtle glow)
     const bokehCount = isMobile ? 16 : 26;
     const bokehFlakes: Snowflake[] = Array.from({ length: bokehCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      radius: Math.random() * 2.5 + 3.2, // 3.2px - 5.7px glowing flakes
+      radius: Math.random() * 2.5 + 3.2, // 3.2px - 5.7px
       vy: Math.random() * 0.55 + 0.3,
       vx: Math.random() * 0.3 - 0.15,
       wobble: Math.random() * Math.PI * 2,
       wobbleSpeed: Math.random() * 0.018 + 0.008,
-      alpha: Math.random() * 0.3 + 0.6,
-      color: Math.random() > 0.3 ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 220, 150, 0.85)",
+      alpha: Math.random() * 0.15 + 0.18, // Very delicate bokeh glow
+      color: Math.random() > 0.3 ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 220, 150, 0.45)",
       glow: true,
     }));
 
@@ -98,7 +98,7 @@ export function StarField() {
         ctx.fillStyle = f.color;
         ctx.globalAlpha = f.alpha;
         if (f.glow) {
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 4;
           ctx.shadowColor = f.color;
         }
         ctx.beginPath();
@@ -125,7 +125,7 @@ export function StarField() {
         ctx.save();
         ctx.fillStyle = b.color;
         ctx.globalAlpha = b.alpha;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = b.color;
         ctx.beginPath();
         ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
@@ -147,7 +147,7 @@ export function StarField() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-10 opacity-100"
+      className="fixed inset-0 pointer-events-none z-10 opacity-70"
       aria-hidden="true"
     />
   );
