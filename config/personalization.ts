@@ -7,6 +7,8 @@ export interface StoryPart {
 export interface SiteConfig {
   herName: string;
   myName: string;
+  creatorName?: string;
+  footerCredit?: string;
   title: string;
   tagline: string;
 
@@ -79,7 +81,9 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   herName: "", // e.g. "My Moon" (Leave empty for default poetic phrasing)
-  myName: "", // e.g. "Alex" (Leave empty for default signature)
+  myName: "Ranajit", // e.g. "Ranajit"
+  creatorName: "Ranajit",
+  footerCredit: "Created by Ranajit",
   title: "A Light That Never Asked to Be the Moon",
   tagline: "A little story for someone special ♡",
 
